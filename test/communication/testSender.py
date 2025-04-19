@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../..")
 
-from comm import WifiCommSender
+from communication import WifiCommSender
 
 RECEIVER_IP = "localhost"
 RECEIVER_PORT = 12345
