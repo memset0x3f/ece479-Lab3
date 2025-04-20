@@ -17,6 +17,9 @@ class WifiCommSender:
         except Exception as e:
             print(f"Error sending data: {e}")
 
+    def close(self):
+        self.sock.close()
+
 class WifiCommReceiver:
     def __init__(self, port):
         self.port = port

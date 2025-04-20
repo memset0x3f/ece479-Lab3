@@ -1,1 +1,1 @@
-from communication.wifi.wifi import WifiCommReceiver, WifiCommSender
+from .wifi.wifi import WifiCommReceiver, WifiCommSender
