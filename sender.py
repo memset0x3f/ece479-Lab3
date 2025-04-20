@@ -1,4 +1,4 @@
-from communication import WifiCommSender
+from communication import WifiCommSender, BluetoothCommSender
 from mpu import IMU
 import config
 import logging
@@ -6,9 +6,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Sender:
-    def __init__(self, receiver_ip, receiver_port):
+    def __init__(self, comm):
         self.running = True
-        self.sender = WifiCommSender(receiver_ip, receiver_port)
+        self.sender = comm
         self.imu = IMU()
 
     def start(self):
@@ -24,11 +24,17 @@ class Sender:
 
 
 if __name__ == "__main__":
-    receiver_ip = config.RECEIVER_IP
-    receiver_port = config.RECEIVER_PORT
     logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL)
 
-    sender = Sender(receiver_ip, receiver_port)
+    if config.COMMUNICATION_TYPE == "wifi":
+        receiver_ip = config.RECEIVER_IP
+        receiver_port = config.RECEIVER_PORT
+        comm = WifiCommSender(receiver_ip, receiver_port)
+    elif config.COMMUNICATION_TYPE == "bluetooth":
+        port = config.SENDER_BT_PORT
+        comm = BluetoothCommSender(port)
+
+    sender = Sender(comm)
     try:
         logger.info("Sender started. Press Ctrl+C to stop.")
         sender.start()

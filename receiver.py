@@ -1,13 +1,13 @@
-from communication import WifiCommReceiver
+from communication import WifiCommReceiver, BluetoothCommReceiver
 import config
 import logging
 
 logger = logging.getLogger(__name__)
 
 class Receiver:
-    def __init__(self, port):
+    def __init__(self, comm):
         self.running = True
-        self.receiver = WifiCommReceiver(port)
+        self.receiver = comm
 
     def start(self):
         while self.running:
@@ -20,10 +20,16 @@ class Receiver:
         self.receiver.close()
 
 if __name__ == "__main__":
-    port = config.RECEIVER_PORT
     logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL)
 
-    receiver = Receiver(port)
+    if config.COMMUNICATION_TYPE == "wifi":
+        port = config.RECEIVER_PORT
+        comm = WifiCommReceiver(port)
+    elif config.COMMUNICATION_TYPE == "bluetooth":
+        port = config.SENDER_BT_PORT
+        comm = BluetoothCommReceiver(config.SENDER_BT_NAME, port)
+
+    receiver = Receiver(comm)
     try:
         receiver.start()
     except KeyboardInterrupt:

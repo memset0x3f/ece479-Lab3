@@ -3,6 +3,7 @@ sys.path.append("../..")
 
 from communication import WifiCommSender
 import config
+import time
 
 RECEIVER_IP = config.RECEIVER_IP
 RECEIVER_PORT = config.RECEIVER_PORT
@@ -19,6 +20,9 @@ def testBT():
     data = {"message": "Hello, Bluetooth!"}
     sender.send(data)
     print("Data sent successfully.")
+
+    time.sleep(5)
+    sender.close()
 
 if __name__ == "__main__":
     testBT()

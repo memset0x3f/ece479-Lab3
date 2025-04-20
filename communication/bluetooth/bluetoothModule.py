@@ -3,6 +3,7 @@ import time
 import subprocess
 import bluetooth
 import logging
+import select
 
 class BluetoothCommSender:
     def _getMAC(self):
@@ -59,14 +60,12 @@ class BluetoothCommReceiver:
             return
 
     def receive(self):
-        try:
-            data = self.sock.recv(1024)
-            data_dict = json.loads(data.decode())
-            assert "timestamp" in data_dict, "Timestamp not found in data"
-            return data_dict
-        except Exception as e:
-            print(f"Error receiving data: {e}")
-            return None
+        data = self.sock.recv(1024)
+        if not data:
+            raise bluetooth.BluetoothError("Connection closed.")
+        data_dict = json.loads(data.decode())
+        assert "timestamp" in data_dict, "Timestamp not found in data"
+        return data_dict
 
     def close(self):
         self.sock.close()
