@@ -1,8 +1,8 @@
 import sys
 sys.path.append("../..")
 
-from communication import WifiCommReceiver
 import config
+from communication import WifiCommReceiver
 
 PORT = config.RECEIVER_PORT
 
