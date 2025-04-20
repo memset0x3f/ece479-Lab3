@@ -26,7 +26,7 @@ class Sender:
 if __name__ == "__main__":
     receiver_ip = config.RECEIVER_IP
     receiver_port = config.RECEIVER_PORT
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL)
 
     sender = Sender(receiver_ip, receiver_port)
     try:

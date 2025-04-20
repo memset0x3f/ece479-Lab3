@@ -21,7 +21,7 @@ class Receiver:
 
 if __name__ == "__main__":
     port = config.RECEIVER_PORT
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL)
 
     receiver = Receiver(port)
     try:
