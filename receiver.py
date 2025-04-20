@@ -1,5 +1,4 @@
 from communication import WifiCommReceiver
-from mpu import IMU
 import config
 import logging
 
