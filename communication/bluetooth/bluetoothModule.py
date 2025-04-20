@@ -60,7 +60,7 @@ class BluetoothCommReceiver:
 
     def receive(self):
         try:
-            data = self.client_sock.recv(1024)
+            data = self.sock.recv(1024)
             data_dict = json.loads(data.decode())
             assert "timestamp" in data_dict, "Timestamp not found in data"
             return data_dict
@@ -69,6 +69,4 @@ class BluetoothCommReceiver:
             return None
 
     def close(self):
-        if self.client_sock:
-            self.client_sock.close()
         self.sock.close()
