@@ -1,6 +1,7 @@
 from communication import WifiCommReceiver, BluetoothCommReceiver
 import config
 import logging
+from mouse import Mouse
 
 logger = logging.getLogger(__name__)
 
@@ -8,12 +9,15 @@ class Receiver:
     def __init__(self, comm):
         self.running = True
         self.receiver = comm
+        self.mouse = Mouse()
 
     def start(self):
         while self.running:
             data = self.receiver.receive()
             if data:
-                logger.info(f"Data received: {data}")
+                x, y = self.mouse.solve(data["position"][0], data["position"][1])
+                self.mouse.move_to(x, y)
+                logger.info(f"Mouse moved to: {x}, {y}")
 
     def stop(self):
         self.running = False
