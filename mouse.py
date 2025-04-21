@@ -15,7 +15,7 @@ class Mouse:
         
     def solve(self, x, y):
         x_ratio, y_ratio = x / self.MAX_X, y / self.MAX_Y
-        x_screen, y_screen = int(x_ratio * self.screen_width), int(y_ratio * self.screen_height)
+        x_screen, y_screen = int(x_ratio * self.screen_width/2 + self.center_x), int(y_ratio * self.screen_height/2 + self.center_x)
         return x_screen, y_screen
         
     
