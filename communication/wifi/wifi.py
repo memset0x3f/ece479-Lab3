@@ -43,7 +43,7 @@ class WifiCommReceiver:
             return None
         except Exception as e:
             print(f"Error receiving data: {e}")
-            return None
+            raise e
 
     def close(self):
         self.sock.close()

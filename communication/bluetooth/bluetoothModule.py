@@ -24,13 +24,10 @@ class BluetoothCommSender:
         self.client_address = None
 
         self.wait_for_connection()
-        # data = self.client_sock.recv(10)  # Receive data to establish connection
-        # print(f"Received data: {data}")
 
     def wait_for_connection(self):
         self.sock.listen(1)
         self.client_sock, self.client_address = self.sock.accept()
-        print(f"Connected to {self.client_address}")
 
 
     def send(self, data):
@@ -56,8 +53,7 @@ class BluetoothCommReceiver:
                 print(f"Connected to {name} at {addr}")
                 break
         else:
-            print(f"Device {sender_name} not found.")
-            return
+            raise bluetooth.BluetoothError(f"Device {sender_name} not found.")
 
     def receive(self):
         data = self.sock.recv(1024)
