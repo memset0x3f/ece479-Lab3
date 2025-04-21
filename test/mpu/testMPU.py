@@ -2,7 +2,6 @@ import numpy as np
 import RTIMU
 import time
 import math
-import config
 
 class VelocityPositionTracker:
     """Velocity and position tracker with drift compensation."""
@@ -17,20 +16,19 @@ class VelocityPositionTracker:
         self.zero_threshold = 0.05
 
     def update(self, accel, dt):
-        if np.linalg.norm(accel) < self.zero_threshold:
-            self.velocity *= 0.5
-        else:
+        if np.linalg.norm(accel) > self.zero_threshold:
             avg_accel = 0.5 * (self.last_accel + accel)
             self.velocity += avg_accel * dt
             self.last_accel = accel.copy()
 
-        self.position += self.velocity * dt
-        self.velocity *= self.velocity_decay
-        self.position = np.clip(self.position, -self.position_clip, self.position_clip)
+        if np.linalg.norm(self.velocity) > self.zero_threshold:
+            self.position += self.velocity * dt
+            self.velocity *= self.velocity_decay
+            self.position = np.clip(self.position, -self.position_clip, self.position_clip)
 
 class IMU:
     def __init__(self, slerp_power=0.02):
-        self.SETTINGS_FILE = config.SETTINGS_FILE
+        self.SETTINGS_FILE = "RTIMULib"
         self.settings = RTIMU.Settings(self.SETTINGS_FILE)
         self.imu = RTIMU.RTIMU(self.settings)
 
@@ -77,13 +75,15 @@ class IMU:
                 "lin_accel": lin_accel.tolist(),
                 "velocity": self.tracker.velocity.copy().tolist(),
                 "position": self.tracker.position.copy().tolist(),
-                "attitude": np.degrees(data["fusionPose"]).tolist()
+                "attitude": np.degrees(data["fusionPose"]).tolist(),
+                "Gyro": np.degrees(data["gyro"]).tolist(),
+                "Compass": np.degrees(data["compass"]).tolist(),
             }
         return None
 
 if __name__ == "__main__":
     try:
-        imu = IMU()
+        imu = IMU(0.1)
         print("Tracking started. Press Ctrl+C to stop.")
 
         while True:
@@ -96,6 +96,16 @@ if __name__ == "__main__":
                 print("Linear Acceleration (m/s²): "
                       f"X={data['lin_accel'][0]:.3f}, "
                       f"Y={data['lin_accel'][1]:.3f}, Z={data['lin_accel'][2]:.3f}")
+                print(f"Attitude (degrees): "
+                      f"Roll={data['attitude'][0]:.3f}, "
+                      f"Pitch={data['attitude'][1]:.3f}, "
+                      f"Yaw={data['attitude'][2]:.3f}")
+                print(f"Gyro (degrees/s): "
+                      f"X={data['Gyro'][0]:.3f}, "
+                      f"Y={data['Gyro'][1]:.3f}, Z={data['Gyro'][2]:.3f}")
+                print(f"Compass (degrees): "
+                        f"X={data['Compass'][0]:.3f}, "
+                        f"Y={data['Compass'][1]:.3f}, Z={data['Compass'][2]:.3f}")
                 time.sleep(imu.poll_interval / 1000.0)
 
     except KeyboardInterrupt:
