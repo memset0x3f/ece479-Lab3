@@ -1,4 +1,4 @@
-# from communication import WifiCommSender, BluetoothCommSender
+from communication import WifiCommSender, BluetoothCommSender
 from mpu import IMU
 import config
 import logging
@@ -29,12 +29,12 @@ if __name__ == "__main__":
     logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL)
 
     if config.COMMUNICATION_TYPE == "wifi":
-        from communication import WifiCommSender
+        # from communication import WifiCommSender
         receiver_ip = config.RECEIVER_IP
         receiver_port = config.RECEIVER_PORT
         comm = WifiCommSender(receiver_ip, receiver_port)
     elif config.COMMUNICATION_TYPE == "bluetooth":
-        from communication import BluetoothCommSender
+        # from communication import BluetoothCommSender
         port = config.SENDER_BT_PORT
         comm = BluetoothCommSender(port)
 

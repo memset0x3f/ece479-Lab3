@@ -1,4 +1,4 @@
-from communication import WifiCommReceiver, BluetoothCommReceiver
+# from communication import WifiCommReceiver, BluetoothCommReceiver
 import config
 import logging
 from mouse import Mouse
@@ -27,9 +27,11 @@ if __name__ == "__main__":
     logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL)
 
     if config.COMMUNICATION_TYPE == "wifi":
+        from communication import WifiCommReceiver
         port = config.RECEIVER_PORT
         comm = WifiCommReceiver(port)
     elif config.COMMUNICATION_TYPE == "bluetooth":
+        from communication import BluetoothCommReceiver
         port = config.SENDER_BT_PORT
         comm = BluetoothCommReceiver(config.SENDER_BT_NAME, port)
 
