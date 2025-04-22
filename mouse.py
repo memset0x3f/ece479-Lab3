@@ -9,8 +9,8 @@ class Mouse:
         self.screen_width, self.screen_height = pyautogui.size()
         self.center_x = self.screen_width // 2
         self.center_y = self.screen_height // 2
-        self.MAX_X = 1.6
-        self.MAX_Y = 0.9
+        self.MAX_X = 0.8
+        self.MAX_Y = 0.5
         pyautogui.PAUSE = pause
         
     def solve(self, x, y):

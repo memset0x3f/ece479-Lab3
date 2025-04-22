@@ -10,11 +10,17 @@ class VelocityPositionTracker:
         self.velocity = np.zeros(3)  # [vx, vy, vz] in m/s
         self.position = np.zeros(3)  # [x, y, z] in meters
         self.last_accel = np.zeros(3)
+        self.attitude = np.zeros(3)  # [roll, pitch, yaw] in radians
 
         # Compensation parameters
         self.velocity_decay = 0.8
-        self.position_clip = 10.0
+        self.position_clip = 1
         self.zero_threshold = 0.05
+        self.rad2degree = 57.2958
+    
+    def get_attitude_in_degrees(self):
+        return self.attitude * self.rad2degree
+    
 
     def update(self, accel, dt):
         if np.linalg.norm(accel) < self.zero_threshold:
@@ -27,6 +33,29 @@ class VelocityPositionTracker:
         self.position += self.velocity * dt
         self.velocity *= self.velocity_decay
         self.position = np.clip(self.position, -self.position_clip, self.position_clip)
+    
+    def update_position_by_tilt(self, tilt, dt, sensitivity=0.01):
+        """
+        Update the position based on the tilt (roll, pitch).
+        The more tilt, the faster the position moves.
+        """
+        #the roll, pitch are in degrees
+        roll, pitch = tilt[:2]  # Only consider roll and pitch
+        tilt_magnitude = math.sqrt(roll**2 + pitch**2)  # Calculate tilt magnitude
+        threshold = 30  # degrees
+        if tilt_magnitude < threshold:
+            return  # Ignore small tilts
+
+        self.position[0] += roll * sensitivity * dt
+        self.position[1] += pitch * sensitivity * dt
+        # Clip the position to avoid excessive drift
+        self.position = np.clip(self.position, -self.position_clip, self.position_clip)
+
+
+    def update_attitude(self, gyro, dt):
+        self.attitude += gyro * dt
+        self.attitude = np.clip(self.attitude, -np.pi, np.pi)
+        
 
 class IMU:
     def __init__(self, slerp_power=0.02):
@@ -70,14 +99,20 @@ class IMU:
             self.last_ts = ts
 
             lin_accel = self._get_lin_accel(data)
-            self.tracker.update(lin_accel, dt)
+            # self.tracker.update(lin_accel, dt)
+
+            gyro = np.array(data["gyro"]) # in rad/s 
+            self.tracker.update_attitude(gyro, dt)
+            tilt = self.tracker.get_attitude_in_degrees()
+            self.tracker.update_position_by_tilt(tilt, dt)
+
 
             return {
                 "timestamp": ts,
                 "lin_accel": lin_accel.tolist(),
                 "velocity": self.tracker.velocity.copy().tolist(),
                 "position": self.tracker.position.copy().tolist(),
-                "attitude": np.degrees(data["fusionPose"]).tolist()
+                "attitude": self.tracker.get_attitude_in_degrees().copy().tolist(),
             }
         return None
 
@@ -96,6 +131,8 @@ if __name__ == "__main__":
                 print("Linear Acceleration (m/s²): "
                       f"X={data['lin_accel'][0]:.3f}, "
                       f"Y={data['lin_accel'][1]:.3f}, Z={data['lin_accel'][2]:.3f}")
+                print(f"Attitude (rad): Roll={data['attitude'][0]:.3f}, "
+                        f"Pitch={data['attitude'][1]:.3f}, Yaw={data['attitude'][2]:.3f}")
                 time.sleep(imu.poll_interval / 1000.0)
 
     except KeyboardInterrupt:

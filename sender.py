@@ -16,6 +16,8 @@ class Sender:
             data = self.imu.get_data()
             if data:
                 self.sender.send(data)
+                # attitude = data["attitude"]
+                # logger.info(f"Attitude: {attitude}")
                 logger.info(f"Data sent: {data}")
 
     def stop(self):
