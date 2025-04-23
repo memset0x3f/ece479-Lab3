@@ -3,7 +3,7 @@ import logging
 LOG_LEVEL = logging.INFO
 LOG_FILE = None
 
-COMMUNICATION_TYPE = "wifi"  # Options: "bluetooth", "wifi"
+COMMUNICATION_TYPE = "bluetooth"  # Options: "bluetooth", "wifi"
 
 RECEIVER_IP = "100.121.255.15"
 RECEIVER_PORT = 12345
