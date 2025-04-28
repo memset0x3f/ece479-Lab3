@@ -1,5 +1,5 @@
 from communication import WifiCommSender, BluetoothCommSender
-from mpu import IMU
+from mpu import ControllerData
 import config
 import logging
 
@@ -9,11 +9,11 @@ class Sender:
     def __init__(self, comm):
         self.running = True
         self.sender = comm
-        self.imu = IMU()
+        self.imus = ControllerData()
 
     def start(self):
         while self.running:
-            data = self.imu.get_data()
+            data = self.imus.get_data()
             if data:
                 self.sender.send(data)
                 # attitude = data["attitude"]

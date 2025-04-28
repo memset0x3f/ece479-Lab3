@@ -3,9 +3,25 @@
 import RTIMU
 import time
 import json
+import smbus 
+bus = smbus.SMBus(1)
 
+MUX_ADDR = 0x70
+
+def select_channel(channel):
+    try: 
+        bus.write_byte(MUX_ADDR, 1 << channel)
+        return True
+    except IOError:
+        print(f"Failed to select channel {channel}")
+        return False
+'''
+This is the outfile config;
+'''
 SETTINGS_FILE = "RTIMULib_backup"
-CALIBRATION_FILE = "calibration.json"
+CALIBRATION_FILE = "calibration1.json"
+select_channel(1)
+
 
 def calibrate_gyro(settings):
     """Gyroscope calibration function"""

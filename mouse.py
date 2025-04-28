@@ -23,13 +23,14 @@ class Mouse:
         x, y = pyautogui.position()
         return x, y
         
-    def click(self, x, y):
-        pyautogui.click(x, y)
+    def click(self, x, y, button="left"):
+        pyautogui.click(x, y, button=button)
         
     def move_to(self, x, y):
         pyautogui.moveTo(x, y)
-
-
+    
+    def double_click(self, x, y, button="left"):
+        pyautogui.doubleClick(x, y, button=button)
 #make a [(x,y)] of circle in the center of the screen,
 #with radius 100
 #input (x0, y0) is the center of the circle
