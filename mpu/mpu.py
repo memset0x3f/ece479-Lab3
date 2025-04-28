@@ -2,12 +2,20 @@ import numpy as np
 import RTIMU
 import time
 import math
-# import config
+try:
+    import config
+except ImportError:
+    print("In testing mpu mode, don't need config.py")
+    
 import smbus 
 from collections import deque
 from scipy.signal import butter, filtfilt, windows
 from scipy.fft import rfft, rfftfreq
-
+try: 
+    from button import ButtonDetector
+except ImportError:
+    print("In testing mpu mode, don't need button.py")
+    pass
 
 bus = smbus.SMBus(1)
 MUX_ADDR = 0x70
@@ -45,6 +53,7 @@ class VelocityPositionTracker:
         self.position += self.velocity * dt
         self.velocity *= self.velocity_decay
         self.position = np.clip(self.position, -self.position_clip, self.position_clip)
+        # print(self.position)
     
     def update_position_by_tilt(self, tilt, dt, sensitivity=0.01):
         """
@@ -195,19 +204,17 @@ class IMU:
 
     def get_data(self):
         
+        startT = time.time()
         if self._select_channel(self.channel):
-            startT = time.time()
             # start_imu_readT = time.time()
             # temp = self.imu.IMURead()
             # end_imu_readT = time.time()
             # print("IMU read time: ", end_imu_readT - start_imu_readT)
-            if self.imu.IMURead():
-                # end_imu_readT = time.time()
-                # print("IMU read time: ", end_imu_readT - start_imu_readT)
-                # read_startT = time.time()
+            tmp = self.imu.IMURead()
+            endT = time.time()
+            print(f"{self.name} Time take for event: ", endT - startT)
+            if tmp:
                 data = self.imu.getIMUData()
-                # read_endT = time.time()
-                # print("Read time: ", read_endT - read_startT)
                 ts = data["timestamp"]
 
                 if self.last_ts is None:
@@ -221,17 +228,17 @@ class IMU:
                 
                 # startT = time.time()
                 if self.enable_tap_detector:
-                    start_solve_t = time.time()
+                    # start_solve_t = time.time()
                     event = self.tap_detector.feed(np.array(lin_accel))
-                    end_solve_t = time.time()
-                    print(f"{self.name}: Tap detection time: ", end_solve_t - start_solve_t)
+                    # end_solve_t = time.time()
+                    # print(f"{self.name}: Tap detection time: ", end_solve_t - start_solve_t)
                 else: 
                     event = None
                 # self.tracker.update(lin_accel, dt)
                 print(f"{self.name}: rate:", dt)
+
+
                 if not self.enable_tracker:
-                    endT = time.time()
-                    print(f"{self.name} Time take for event: ", endT - startT)
                     return {
                         "timestamp": ts,
                         "lin_accel": lin_accel.tolist(),
@@ -247,8 +254,6 @@ class IMU:
                 
                 tilt = self.tracker.get_attitude_in_degrees()
                 self.tracker.update_position_by_tilt(tilt, dt)
-                endT = time.time()
-                print(f"{self.name}Time taken: ", endT - startT)
                 return {
                     "timestamp": ts,
                     "lin_accel": lin_accel.tolist(),
@@ -266,24 +271,24 @@ class IMU:
             return None
         
         
-    def read_data(self):
-        if self._select_channel(self.channel):
-            if self.imu.IMURead():
-                data = self.imu.getIMUData()
-                ts = data["timestamp"]
-                if self.last_ts is None:
-                    dt = self.poll_interval / 1000.0
-                else:
-                    dt = (ts - self.last_ts) / 1e6
-                self.last_ts = ts 
+    # def read_data(self):
+    #     if self._select_channel(self.channel):
+    #         if self.imu.IMURead():
+    #             data = self.imu.getIMUData()
+    #             ts = data["timestamp"]
+    #             if self.last_ts is None:
+    #                 dt = self.poll_interval / 1000.0
+    #             else:
+    #                 dt = (ts - self.last_ts) / 1e6
+    #             self.last_ts = ts 
                 
                 
-            else: 
-                print("IMU read failed")
-                return None
-        else: 
-            print("Failed to select channel", self.channel)
-            return None
+    #         else: 
+    #             print("IMU read failed")
+    #             return None
+    #     else: 
+    #         print("Failed to select channel", self.channel)
+    #         return None
         
         
 
@@ -294,6 +299,7 @@ class ControllerData:
         self.hand = IMU(channel=2, setting_file=SETTINGS_FILE_2, enable_tap_detector=False)
         # print(self.indexFinger.tap_detector)
         self.poll_interval = self.indexFinger.poll_interval
+        self.button_detector = ButtonDetector(config.BUTTONS_ADDR)
         print(self.indexFinger.get_data())
         print("init done")
         
@@ -302,10 +308,12 @@ class ControllerData:
         left_data = self.indexFinger.get_data()
         right_data = self.middleFinger.get_data()
         hand_data = self.hand.get_data()
+        button_data = self.button_detector.detectAll()
         data = {
             "leftEvent": None, 
             "rightEvent": None, 
-            "position": None
+            "position": None, 
+            "buttons": None,
         }
         if left_data != None: 
             data["leftEvent"] = left_data["event"]
@@ -313,6 +321,8 @@ class ControllerData:
             data["rightEvent"] = right_data["event"]
         if hand_data != None:
             data["position"] = hand_data["position"]
+        if button_data != None:
+            data["buttons"] = button_data
         return data
         
 
@@ -332,7 +342,8 @@ if __name__ == "__main__":
             print("Right event: ", data["rightEvent"])
             exit()
         # print(data_stream.poll_interval / 1000)
-        time.sleep(data_stream.poll_interval / 1000.0)
+        # print("Time interval: ", data_stream.poll_interval / 1000.0)
+        time.sleep(1 / 1000.0)
     
     # imu0 = IMU(channel=0, setting_file=SETTINGS_FILE_0)
     # while True:

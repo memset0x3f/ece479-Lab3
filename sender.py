@@ -13,6 +13,9 @@ class Sender:
 
     def start(self):
         while self.running:
+            data = {
+                
+            }
             data = self.imus.get_data()
             if data:
                 self.sender.send(data)
