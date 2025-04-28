@@ -17,14 +17,16 @@ class Receiver:
             if data:
                 if data["position"]:
                     x, y = self.mouse.solve(data["position"][0], data["position"][1])
+                    self.mouse.move_to(x, y)
                 if data["leftEvent"]:
                     self.mouse.click(x, y)
                     logger.info(f"Left click at: {x}, {y}")
                 if data["rightEvent"]:
                     self.mouse.double_click(x, y)
                     logger.info(f"Right double click at: {x}, {y}")
-                self.mouse.move_to(x, y)
+                
                 logger.info(f"Mouse moved to: {x}, {y}")
+                logger.info(f"screen size: {self.mouse.screen_width}, {self.mouse.screen_height}")
 
     def stop(self):
         self.running = False
