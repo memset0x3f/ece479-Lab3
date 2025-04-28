@@ -325,6 +325,7 @@ class ControllerData:
             "rightEvent": None, 
             "position": None, 
             "buttons": None,
+            "attitude": None
         }
         if left_data != None: 
             data["leftEvent"] = left_data["event"]
@@ -332,6 +333,7 @@ class ControllerData:
             data["rightEvent"] = right_data["event"]
         if hand_data != None:
             data["position"] = hand_data["position"]
+            data["attitude"] = hand_data["attitude"]
         if button_data != None:
             data["buttons"] = button_data
         return data
