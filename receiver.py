@@ -1,7 +1,7 @@
 # from communication import WifiCommReceiver, BluetoothCommReceiver
 import config
 import logging
-from mouse import Mouse
+from mouse import PC_Controller
 
 logger = logging.getLogger(__name__)
 
@@ -9,26 +9,42 @@ class Receiver:
     def __init__(self, comm):
         self.running = True
         self.receiver = comm
-        self.mouse = Mouse()
+        self.controller = PC_Controller()
 
     def start(self):
+        entered = False
         while self.running:
             data = self.receiver.receive()
             if data:
                 if data["buttons"]:
-                    logger.info(f"Button states: {data['buttons']}")
+                    # logger.info(f"Button states: {data['buttons']}")
+                    for button, state in data["buttons"].items():
+                        if button == "17":
+                            if state == "onclick":
+                                self.controller.press("r")
+                        if button == "22":
+                            if state == "onclick":
+                                entered  = not entered
+                                if entered:
+                                    logger.info("Entered control mode")
+                                else:
+                                    logger.info("Exited control mode")
+                if not entered:
+                    continue
+
                 if data["position"]:
-                    x, y = self.mouse.solve(data["position"][0], data["position"][1])
-                    self.mouse.move_to(x, y)
+                    x, y = self.controller.solve(data["position"][0], data["position"][1])
+                    self.controller.move_to(x, y)
+                    logger.info(f"Mouse moved to: {x}, {y}")
                 if data["leftEvent"]:
-                    self.mouse.click(x, y)
+                    self.controller.click(x, y)
                     logger.info(f"Left click at: {x}, {y}")
                 if data["rightEvent"]:
-                    self.mouse.double_click(x, y)
+                    self.controller.double_click(x, y)
                     logger.info(f"Right double click at: {x}, {y}")
                 
-                logger.info(f"Mouse moved to: {x}, {y}")
-                logger.info(f"screen size: {self.mouse.screen_width}, {self.mouse.screen_height}")
+                # logger.info(f"Mouse moved to: {x}, {y}")
+                logger.info(f"screen size: {self.controller.screen_width}, {self.controller.screen_height}")
 
     def stop(self):
         self.running = False

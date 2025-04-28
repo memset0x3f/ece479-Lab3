@@ -4,7 +4,7 @@ import time
 import logging
 
 
-class Mouse: 
+class PC_Controller: 
     def __init__(self, pause=0.0001):
         self.screen_width, self.screen_height = pyautogui.size()
         self.center_x = self.screen_width // 2
@@ -20,8 +20,8 @@ class Mouse:
     def solve(self, x, y):
         x_ratio = (x - self.raw_x_min) / (self.raw_x_max - self.raw_x_min)
         y_ratio = (y - self.raw_y_min) / (self.raw_y_max - self.raw_y_min)
-        x_screen = int(x_ratio * self.screen_width  + self.center_x)
-        y_screen = int(y_ratio * self.screen_height + self.center_y)
+        x_screen = int(x_ratio * self.screen_width)
+        y_screen = int(y_ratio * self.screen_height)
         # x_ratio, y_ratio = x / self.MAX_X, y / self.MAX_Y
         # x_screen, y_screen = int(x_ratio * self.screen_width/2 + self.center_x), int(y_ratio * self.screen_height/2 + self.center_x)
         # x_screen = min(max(x_screen, 2), self.screen_width - 2)
@@ -45,9 +45,15 @@ class Mouse:
     def move_to(self, x, y):
         pyautogui.moveTo(x, y)
 
+    def double_click(self, x, y):
+        pyautogui.doubleClick(x, y)
+
+    def press(self, key):
+        pyautogui.press(key)
+
 if __name__ == "__main__":
     print("Press Ctrl+C to exit")
-    mouse = Mouse()
+    mouse = PC_Controller()
     while True: 
         x = int(input("x: "))
         y = int(input("y: "))
