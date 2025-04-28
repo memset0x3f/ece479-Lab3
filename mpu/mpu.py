@@ -61,21 +61,22 @@ class VelocityPositionTracker:
         The more tilt, the faster the position moves.
         """
         #the roll, pitch are in degrees
-        roll, pitch = tilt[:2]  # Only consider roll and pitch
+        roll, pitch, yaw = tilt  # Only consider roll and pitch
         tilt_magnitude = math.sqrt(roll**2 + pitch**2)  # Calculate tilt magnitude
         threshold = 30  # degrees
         if tilt_magnitude < threshold:
             return  # Ignore small tilts
 
-        self.position[0] += roll * sensitivity * dt
-        self.position[1] += pitch * sensitivity * dt
+        self.position[0] += pitch * sensitivity * dt
+        self.position[1] += -yaw * sensitivity * dt
         # Clip the position to avoid excessive drift
         self.position = np.clip(self.position, -self.position_clip, self.position_clip)
 
 
     def update_attitude(self, gyro, dt):
+        
         self.attitude += gyro * dt
-        self.attitude = np.clip(self.attitude, -np.pi, np.pi)
+        self.attitude = np.clip(self.attitude, -np.pi/3, np.pi/3)
 
 
 class TapDetector:
@@ -212,7 +213,7 @@ class IMU:
             # print("IMU read time: ", end_imu_readT - start_imu_readT)
             tmp = self.imu.IMURead()
             endT = time.time()
-            print(f"{self.name} Time take for event: ", endT - startT)
+            # print(f"{self.name} Time take for event: ", endT - startT)
             if tmp:
                 data = self.imu.getIMUData()
                 ts = data["timestamp"]
@@ -235,7 +236,9 @@ class IMU:
                 else: 
                     event = None
                 # self.tracker.update(lin_accel, dt)
-                print(f"{self.name}: rate:", dt)
+                # print(f"{self.name}: rate:", dt)
+                if self.name == "IMU_2":
+                    print(f"{self.name}: attitude: ", self.tracker.get_attitude_in_degrees())
 
 
                 if not self.enable_tracker:
@@ -299,7 +302,11 @@ class ControllerData:
         self.hand = IMU(channel=2, setting_file=SETTINGS_FILE_2, enable_tap_detector=False)
         # print(self.indexFinger.tap_detector)
         self.poll_interval = self.indexFinger.poll_interval
-        self.button_detector = ButtonDetector(config.BUTTONS_ADDR)
+        try:
+            self.button_detector = ButtonDetector(config.BUTTONS_ADDR)
+        except:
+            print("In testing mpu mode, don't need button.py")
+            self.button_detector = None
         print(self.indexFinger.get_data())
         print("init done")
         
@@ -308,7 +315,11 @@ class ControllerData:
         left_data = self.indexFinger.get_data()
         right_data = self.middleFinger.get_data()
         hand_data = self.hand.get_data()
-        button_data = self.button_detector.detectAll()
+        try:
+            button_data = self.button_detector.detectAll()
+        except:
+            # print("In testing mpu mode, don't need button.py")
+            button_data = None
         data = {
             "leftEvent": None, 
             "rightEvent": None, 
@@ -332,14 +343,16 @@ if __name__ == "__main__":
     while True: 
         data = data_stream.get_data()
         if data:
-            print("Data: ", data)
+            pass
+            # print("Data: ", data)
         else:
-            print("No data")
+            pass
+            # print("No data")
         if data["leftEvent"] != None:
-            print("Left event: ", data["leftEvent"])
+            # print("Left event: ", data["leftEvent"])
             exit()
         if data["rightEvent"] != None:
-            print("Right event: ", data["rightEvent"])
+            # print("Right event: ", data["rightEvent"])
             exit()
         # print(data_stream.poll_interval / 1000)
         # print("Time interval: ", data_stream.poll_interval / 1000.0)
