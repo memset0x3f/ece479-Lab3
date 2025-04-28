@@ -1,7 +1,10 @@
 import json
 import time
 import subprocess
-import bluetooth
+try:
+    import bluetooth
+except ImportError:
+    print("Bluetooth library not found. Make sure to install pybluez.")
 import logging
 import select
 
