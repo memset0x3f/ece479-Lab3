@@ -15,6 +15,8 @@ class Receiver:
         while self.running:
             data = self.receiver.receive()
             if data:
+                if data["buttons"]:
+                    logger.info(f"Button states: {data['buttons']}")
                 if data["position"]:
                     x, y = self.mouse.solve(data["position"][0], data["position"][1])
                     self.mouse.move_to(x, y)
