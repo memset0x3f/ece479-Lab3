@@ -15,7 +15,8 @@ class Receiver:
         while self.running:
             data = self.receiver.receive()
             if data:
-                x, y = self.mouse.solve(data["position"][0], data["position"][1])
+                if data["position"]:
+                    x, y = self.mouse.solve(data["position"][0], data["position"][1])
                 if data["leftEvent"]:
                     self.mouse.click(x, y)
                     logger.info(f"Left click at: {x}, {y}")
