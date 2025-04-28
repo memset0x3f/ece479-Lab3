@@ -16,6 +16,12 @@ class Receiver:
             data = self.receiver.receive()
             if data:
                 x, y = self.mouse.solve(data["position"][0], data["position"][1])
+                if data["leftEvent"]:
+                    self.mouse.click(x, y)
+                    logger.info(f"Left click at: {x}, {y}")
+                if data["rightEvent"]:
+                    self.mouse.double_click(x, y)
+                    logger.info(f"Right double click at: {x}, {y}")
                 self.mouse.move_to(x, y)
                 logger.info(f"Mouse moved to: {x}, {y}")
 
