@@ -67,14 +67,13 @@ class VelocityPositionTracker:
         if tilt_magnitude < threshold:
             return  # Ignore small tilts
 
-        self.position[0] += pitch * sensitivity * dt
-        self.position[1] += -yaw * sensitivity * dt
+        self.position[0] += roll * sensitivity * dt
+        self.position[1] += yaw * sensitivity * dt
         # Clip the position to avoid excessive drift
         self.position = np.clip(self.position, -self.position_clip, self.position_clip)
 
 
     def update_attitude(self, gyro, dt):
-        
         self.attitude += gyro * dt
         self.attitude = np.clip(self.attitude, -np.pi/3, np.pi/3)
 
@@ -316,15 +315,28 @@ class ControllerData:
         right_data = self.middleFinger.get_data()
         hand_data = self.hand.get_data()
         try:
+            # print("Button detector: ", self.button_detector)
             button_data = self.button_detector.detectAll()
         except:
             # print("In testing mpu mode, don't need button.py")
             button_data = None
+        if button_data != None:
+            print("Button data: ", button_data)
+            # button_data = button_data["buttons"]
+            reset = button_data[23]
+            if reset == "onclick":
+                exit()
+                print("Reset")
+                self.hand.tracker.position = np.zeros(3)
+                self.hand.tracker.velocity = np.zeros(3)
+                self.hand.tracker.attitude = np.zeros(3)
+                
         data = {
             "leftEvent": None, 
             "rightEvent": None, 
             "position": None, 
             "buttons": None,
+            "attitude": None
         }
         if left_data != None: 
             data["leftEvent"] = left_data["event"]
@@ -332,6 +344,7 @@ class ControllerData:
             data["rightEvent"] = right_data["event"]
         if hand_data != None:
             data["position"] = hand_data["position"]
+            data["attitude"] = hand_data["attitude"]
         if button_data != None:
             data["buttons"] = button_data
         return data
@@ -349,11 +362,11 @@ if __name__ == "__main__":
             pass
             # print("No data")
         if data["leftEvent"] != None:
-            # print("Left event: ", data["leftEvent"])
-            exit()
+            print("Left event: ", data["leftEvent"])
+            # exit()
         if data["rightEvent"] != None:
-            # print("Right event: ", data["rightEvent"])
-            exit()
+            print("Right event: ", data["rightEvent"])
+            # exit()
         # print(data_stream.poll_interval / 1000)
         # print("Time interval: ", data_stream.poll_interval / 1000.0)
         time.sleep(1 / 1000.0)

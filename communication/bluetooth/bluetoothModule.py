@@ -37,7 +37,9 @@ class BluetoothCommSender:
         try:
             data["timestamp"] = time.time()
             json_data = json.dumps(data)
-            self.client_sock.send(json_data.encode())
+            encoded = json_data.encode()
+            print(f"Length of data: {len(encoded)}")
+            self.client_sock.send(encoded)
         except Exception as e:
             print(f"Error sending data: {e}")
 
