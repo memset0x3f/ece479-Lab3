@@ -2,10 +2,11 @@ import pyautogui
 import math
 import time
 import logging
+import pydirectinput
 
 
 class PC_Controller: 
-    def __init__(self, pause=0.0001):
+    def __init__(self, pause=0.001):
         self.screen_width, self.screen_height = pyautogui.size()
         self.center_x = self.screen_width // 2
         self.center_y = self.screen_height // 2
@@ -16,6 +17,7 @@ class PC_Controller:
         # self.MAX_X = 1
         # self.MAX_Y = 1
         pyautogui.PAUSE = pause
+        pydirectinput.PAUSE = pause
         # print(self.center_x, self.center_y)
     def solve(self, x, y):
         x_ratio = (x - self.raw_x_min) / (self.raw_x_max - self.raw_x_min)
@@ -34,6 +36,21 @@ class PC_Controller:
         print(f"solved x: {x}, y: {y} to screen x: {x_screen}, y: {y_screen}")
         return x_screen, y_screen
         
+    def solve_attitude(self, degree_x, degree_y):
+        x_ratio = (degree_x - 60)/(60 - (-60))
+        y_ratio = (degree_y - 60)/(60 - (-60))
+        x_screen = int(x_ratio * self.screen_width)
+        y_screen = int(y_ratio * self.screen_height)
+        x_screen = min(max(x_screen, 5), self.screen_width - 5)
+        y_screen = min(max(y_screen, 5), self.screen_height - 5)
+        # print(f"solved x: {degree_x}, y: {degree_y} to screen x: {x_screen}, y: {y_screen}")
+        return x_screen, y_screen
+    
+    def move_to_pydirect(self, x,y):
+        pydirectinput.moveTo(x, y, duration=0.02)
+        # pydirectinput.move(x, y, duration=0.1)
+
+
     
     def get_position(self):
         x, y = pyautogui.position()
@@ -76,7 +93,7 @@ def circle(x0, y0, radius, num_points=72):
 
 
 mouse = PC_Controller()
-circle = circle(mouse.center_x, mouse.center_y, 200, 36)
+circle = circle(mouse.center_x, mouse.center_y, 200, 360)
 print(len(circle))
 cnt = 0
 # pyautogui.PAUSE = 0.0001
@@ -84,7 +101,7 @@ while True:
     
     start_time = time.time()
     x, y = circle[cnt]
-    mouse.move_to(x, y)
+    mouse.move_to_pydirect(x, y)
     cnt += 1
     if cnt >= len(circle):
         cnt = 0
@@ -92,7 +109,7 @@ while True:
     print(f"Moved to ({x}, {y}) in {end_time - start_time:.6f} seconds")
     if cnt == 0:
         mouse.click(x, y)
-    time.sleep(1)
+    # time.sleep(1)
 
     
 

@@ -1,7 +1,7 @@
 # from communication import WifiCommReceiver, BluetoothCommReceiver
 import config
 import logging
-from mouse import PC_Controller
+from controller import PC_Controller
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +32,13 @@ class Receiver:
                 if not entered:
                     continue
 
-                if data["position"]:
-                    x, y = self.controller.solve(data["position"][0], data["position"][1])
-                    self.controller.move_to(x, y)
+                # if data["position"]:
+                #     x, y = self.controller.solve(data["position"][0], data["position"][1])
+                #     self.controller.move_to(x, y)
+                #     logger.info(f"Mouse moved to: {x}, {y}")
+                if data["attitude"]:
+                    x, y = self.controller.solve_attitude(data["attitude"][0], data["attitude"][1])
+                    self.controller.move_to_pydirect(x, y)
                     logger.info(f"Mouse moved to: {x}, {y}")
                 if data["leftEvent"]:
                     self.controller.click(x, y)
