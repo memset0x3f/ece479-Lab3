@@ -15,6 +15,7 @@ class Sender:
         while self.running:
             data = self.imus.get_data()
             if data:
+                
                 self.sender.send(data)
                 # attitude = data["attitude"]
                 # logger.info(f"Attitude: {attitude}")
