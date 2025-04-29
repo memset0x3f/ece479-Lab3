@@ -43,7 +43,7 @@ class PC_Controller:
         y_screen = int(y_ratio * self.screen_height)
         x_screen = min(max(x_screen, 5), self.screen_width - 5)
         y_screen = min(max(y_screen, 5), self.screen_height - 5)
-        # print(f"solved x: {degree_x}, y: {degree_y} to screen x: {x_screen}, y: {y_screen}")
+        logging.info(f"solved x: {degree_x}, y: {degree_y} to screen x: {x_screen}, y: {y_screen}")
         return x_screen, y_screen
     
     def move_to_pydirect(self, x,y):
@@ -58,6 +58,7 @@ class PC_Controller:
         
     def click(self, x, y):
         pyautogui.click(x, y)
+        
         
     def move_to(self, x, y):
         pyautogui.moveTo(x, y)

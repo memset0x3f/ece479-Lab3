@@ -37,15 +37,22 @@ class Receiver:
                 #     self.controller.move_to(x, y)
                 #     logger.info(f"Mouse moved to: {x}, {y}")
                 if data["attitude"]:
-                    x, y = self.controller.solve_attitude(data["attitude"][0], data["attitude"][1])
+                    x, y = self.controller.solve_attitude(data["attitude"][0], data["attitude"][2])
+                    print(x,y)
                     self.controller.move_to_pydirect(x, y)
                     logger.info(f"Mouse moved to: {x}, {y}")
                 if data["leftEvent"]:
-                    self.controller.click(x, y)
+                    # self.controller.left_down(x, y)
+                    if data["leftEvent"][0] == "single":
+                        self.controller.click(x, y)
+                    elif data["leftEvent"][0] == "double":
+                        self.controller.double_click(x, y)
                     logger.info(f"Left click at: {x}, {y}")
                 if data["rightEvent"]:
-                    self.controller.double_click(x, y)
-                    logger.info(f"Right double click at: {x}, {y}")
+                    self.controller.right_click(x, y)
+                    logger.info(f"Right click at: {x}, {y}")
+                    # self.controller.double_click(x, y)
+                    # logger.info(f"Right double click at: {x}, {y}")
                 
                 # logger.info(f"Mouse moved to: {x}, {y}")
                 logger.info(f"screen size: {self.controller.screen_width}, {self.controller.screen_height}")

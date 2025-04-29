@@ -4,7 +4,8 @@ import threading
 import time
 from pynput import keyboard
 import math
-
+import logging
+logger = logging.getLogger(__name__)
 class PC_Controller: 
     def __init__(self, pause=0.01):
         self.screen_width, self.screen_height = pyautogui.size()
@@ -49,8 +50,8 @@ class PC_Controller:
         return x_screen, y_screen
         
     def solve_attitude(self, degree_x, degree_y):
-        x_ratio = (degree_x - 60)/(60 - (-60))
-        y_ratio = (degree_y - 60)/(60 - (-60))
+        x_ratio = (degree_x + 45)/(45 - (-45))
+        y_ratio = (degree_y + 45)/(45 - (-45))
         x_screen = int(x_ratio * self.screen_width)
         y_screen = int(y_ratio * self.screen_height)
         x_screen = min(max(x_screen, 5), self.screen_width - 5)
@@ -73,6 +74,21 @@ class PC_Controller:
             return
 
         pyautogui.click(x, y)
+
+    def right_down(self, x, y):
+        if not self.running:
+            print("[left_down] Movement paused.")
+            return
+        #if the left is already pressed,release it; 
+        if pyautogui.mouseDown(button='right'):
+            pyautogui.mouseUp(button='right')
+        else:
+            pyautogui.mouseDown(x, y, button='right')
+    def right_click(self, x, y):
+        if not self.running:
+            print("[right_click] Movement paused.")
+            return
+        pyautogui.rightClick(x, y)
         
     def move_to(self, x, y):
         if not self.running:
